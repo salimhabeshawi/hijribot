@@ -4,9 +4,7 @@ from hijridate import Hijri, Gregorian
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
-if os.getenv("RENDER") is None:
-    from dotenv import load_dotenv
-    load_dotenv()
+
 
 # Configure logging
 logging.basicConfig(
@@ -16,7 +14,9 @@ logging.basicConfig(
 logger = logging.getLogger("hijribot")
 
 # Load environment variables from .env
-load_dotenv()
+if os.getenv("RENDER") is None:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 
 def format_hijri_date(dt: datetime) -> str:
