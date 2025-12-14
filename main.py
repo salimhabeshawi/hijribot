@@ -47,29 +47,36 @@ def start_http_server() -> None:
     port = int(os.environ.get("PORT", DEFAULT_PORT))
 
     class HealthHandler(http.server.BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def _send_ok_headers(self, content_length: int = 0):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.send_header("Content-Length", str(content_length))
+            self.end_headers()
+
         def do_GET(self):
             if self.path == HEALTH_PATH:
-                self.send_response(200)
-                self.send_header("Content-Type", "text/plain")
-                self.end_headers()
-                self.wfile.write(b"ok")
+                body = b"ok"
+                self._send_ok_headers(len(body))
+                self.wfile.write(body)
             else:
                 self.send_response(404)
+                self.send_header("Content-Length", "0")
                 self.end_headers()
 
         def do_HEAD(self):
             if self.path == HEALTH_PATH:
-                self.send_response(200)
-                self.send_header("Content-Type", "text/plain")
-                self.end_headers()
+                self._send_ok_headers(0)
             else:
                 self.send_response(404)
+                self.send_header("Content-Length", "0")
                 self.end_headers()
 
         def log_message(self, *_):
-            return  # Silence default HTTP logs
+            return  # silence logs
 
-    with socketserver.TCPServer(("0.0.0.0", port), HealthHandler) as server:
+    with socketserver.ThreadingTCPServer(("0.0.0.0", port), HealthHandler) as server:
         logger.info("HTTP health server listening on port %s", port)
         server.serve_forever()
 
