@@ -4,7 +4,9 @@ from hijridate import Hijri, Gregorian
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
-from dotenv import load_dotenv
+if os.getenv("RENDER") is None:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 # Configure logging
 logging.basicConfig(
